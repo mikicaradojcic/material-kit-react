@@ -26,6 +26,7 @@ const Login = () => {
         .required('Password is required')
     }),
     onSubmit: () => {
+      console.log('validate');
       Router
         .push('/')
         .catch(console.error);

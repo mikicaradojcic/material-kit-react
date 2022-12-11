@@ -9,7 +9,7 @@ const DashboardLayoutRoot = styled('div')(({ theme }) => ({
   display: 'flex',
   flex: '1 1 auto',
   maxWidth: '100%',
-  paddingTop: 64,
+  paddingTop: 24,
   [theme.breakpoints.up('lg')]: {
     paddingLeft: 280
   }
@@ -17,6 +17,7 @@ const DashboardLayoutRoot = styled('div')(({ theme }) => ({
 
 export const DashboardLayout = (props) => {
   const { children } = props;
+  console.log('opening dashboard');
   const [isSidebarOpen, setSidebarOpen] = useState(true);
 
   return (
