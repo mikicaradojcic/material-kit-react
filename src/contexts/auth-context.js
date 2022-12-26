@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { auth, ENABLE_AUTH } from '../lib/auth';
+//import { auth, ENABLE_AUTH } from '../lib/auth';
+import useDirectusService from '../hooks/useDirectusService';
 
 const HANDLERS = {
   INITIALIZE: 'INITIALIZE',
@@ -17,7 +18,6 @@ const initialState = {
 const handlers = {
   [HANDLERS.INITIALIZE]: (state, action) => {
     const user = action.payload;
-
     return {
       ...state,
       ...(
@@ -61,6 +61,7 @@ const reducer = (state, action) => (
 export const AuthContext = createContext({ undefined });
 
 export const AuthProvider = (props) => {
+  const { isAuthenticated, directusService, getUser } = useDirectusService();
   const { children } = props;
   const [state, dispatch] = useReducer(reducer, initialState);
   const initialized = useRef(false);
@@ -75,38 +76,16 @@ export const AuthProvider = (props) => {
 
     // Check if auth has been skipped
     // From sign-in page we may have set "skip-auth" to "true"
-    const authSkipped = globalThis.sessionStorage.getItem('skip-auth') === 'true';
-
-    if (authSkipped) {
-      const user = {};
-
-      dispatch({
-        type: HANDLERS.INITIALIZE,
-        payload: user
-      });
-      return;
-    }
-
-    // Check if authentication with Zalter is enabled
-    // If not, then set user as authenticated
-    if (!ENABLE_AUTH) {
-      const user = {};
-
-      dispatch({
-        type: HANDLERS.INITIALIZE,
-        payload: user
-      });
-      return;
-    }
+    const authSkipped = false;//globalThis.sessionStorage.getItem('skip-auth') === 'true';
 
     try {
       // Check if user is authenticated
-      const isAuthenticated = await auth.isAuthenticated();
+      const isAuth = await isAuthenticated();
 
-      if (isAuthenticated) {
+      if (isAuth) {
         // Get user from your database
-        const user = {};
-
+        const user = await getUser();
+        console.log('user', user);
         dispatch({
           type: HANDLERS.INITIALIZE,
           payload: user

@@ -3,6 +3,8 @@ import NextLink from 'next/link';
 import Router from 'next/router';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import useDirectusService from '../hooks/useDirectusService';
+
 import {
   Box,
   Button,
@@ -16,6 +18,9 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const Register = () => {
+
+  const { directusService, signIn } = useDirectusService();
+
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -50,9 +55,26 @@ const Register = () => {
           'This field must be checked'
         )
     }),
-    onSubmit: () => {
+    onSubmit: (userData) => {
+      directusService.users.createOne({
+        email: userData.email,
+        password: userData.password,
+        first_name: userData.firstName,
+        last_name: userData.lastName,
+        role: process.env.DIRECTUS_USER_ROLE_GUID
+      }).then(createdUser => {
+
+        signIn({
+          email: userData.email,
+          password: userData.password,
+        }).then(() => {
+          authContext.signIn(createdUser);
+          Router.push('/owner').catch(console.error);
+        });
+      });
+
       Router
-        .push('/')
+        .push('/login')
         .catch(console.error);
     }
   });

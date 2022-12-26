@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import Head from 'next/head';
 import NextLink from 'next/link';
 import Router from 'next/router';
@@ -7,12 +8,18 @@ import { Box, Button, Container, Grid, Link, TextField, Typography } from '@mui/
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Facebook as FacebookIcon } from '../icons/facebook';
 import { Google as GoogleIcon } from '../icons/google';
+import useDirectusService from '../hooks/useDirectusService';
+import { useAuthContext } from '../contexts/auth-context';
 
 const Login = () => {
+  const confirmed = useRef(false);
+  const authContext = useAuthContext();
+  const { directusService, signIn, getUser } = useDirectusService();
+
   const formik = useFormik({
     initialValues: {
-      email: 'demo@devias.io',
-      password: 'Password123'
+      email: 'testan@test.com',
+      password: 'testtest'
     },
     validationSchema: Yup.object({
       email: Yup
@@ -25,11 +32,36 @@ const Login = () => {
         .max(255)
         .required('Password is required')
     }),
-    onSubmit: () => {
-      console.log('validate');
-      Router
-        .push('/')
-        .catch(console.error);
+    onSubmit: (values, { setSubmitting }) => {
+      console.log('validate', values);
+
+      const authCredentials = {
+        email: values.email,
+        password: values.password,
+      };
+
+      if (confirmed.current) {
+        return;
+      }
+      confirmed.current = true;
+
+      signIn(authCredentials).then((data) => {
+        console.log('after login, fo I need getUser bellow', data);
+
+        getUser().then(usr => {
+          authContext.signIn(usr);
+          Router.push('/').catch(console.error);
+        });
+      })
+        .catch(error => {
+          console.log('Eeerror', error);
+          throw error;
+        })
+        .finally(() => {
+          setSubmitting(false);
+        });
+
+
     }
   });
 

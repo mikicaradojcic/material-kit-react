@@ -1,11 +1,11 @@
-import {useState, useEffect} from 'react';
-import {directusService} from '../lib/directusService';
+import { useState, useEffect } from 'react';
+import { directusService } from '../lib/directusService';
 import { useRouter } from 'next/router';
 import * as Yup from 'yup';
 
 
-export const defaultPet = {petName:''};
-export const defaultOwner = {firstName:'', lastName:'', contactPhone:'', city:'', ownersNote:''};
+export const defaultPet = { petName: '' };
+export const defaultOwner = { firstName: '', lastName: '', contactPhone: '', city: '', ownersNote: '' };
 
 export const ownerValidationSchema = Yup.object({
   firstName: Yup
@@ -15,18 +15,18 @@ export const ownerValidationSchema = Yup.object({
   lastName: Yup
     .string()
     .max(255),
-    contactPhone: Yup
+  contactPhone: Yup
     .string()
     .max(255),
-    city: Yup
+  city: Yup
     .string()
     .max(255),
-    ownersNote: Yup
+  ownersNote: Yup
     .string()
     .max(4000)
 });
 
-export const petValidationSchema= Yup.object({
+export const petValidationSchema = Yup.object({
   petName: Yup
     .string()
     .max(255)
@@ -35,86 +35,89 @@ export const petValidationSchema= Yup.object({
 
 const useOwner = (ownerId) => {
 
-const [owner, setOwner] = useState(defaultOwner);
-const [pets, setPets] = useState([]);
+  const [owner, setOwner] = useState(defaultOwner);
+  const [pets, setPets] = useState([]);
 
-const router = useRouter()
+  const router = useRouter()
 
 
-useEffect(()=>{
-  if(ownerId &&!owner.id){
-    console.log(`fetching owner ${ownerId}`, owner);
-    fetchOwner();
-    fetchPets();
-  }
-}, [ownerId]);
-  
-
-const fetchOwner=()=>{
-  if(ownerId){
-        directusService.items('owner').readOne(ownerId).then((data)=>{
-          setOwner(data??defaultOwner);
-          });
+  useEffect(() => {
+    if (ownerId && !owner.id) {
+      console.log(`fetching owner ${ownerId}`, owner);
+      fetchOwner();
+      fetchPets();
     }
-    else{setOwner(defaultOwner);;}
+  }, [ownerId]);
+
+
+  const fetchOwner = () => {
+    if (ownerId) {
+      directusService.items('owner').readOne(ownerId).then((data) => {
+        setOwner(data ?? defaultOwner);
+      });
+    }
+    else { setOwner(defaultOwner);; }
   };
 
   const saveOwner = (ownerToEdit) => {
-    if(ownerToEdit.id){
+    if (ownerToEdit.id) {
       directusService.items('owner').updateOne(ownerToEdit.id, ownerToEdit)
-      .then(data=>{
-        router.push(`/owner/${data.id}`);
-        setOwner(data);
-        console.log('updated', data)});
+        .then(data => {
+          router.push(`/owner/${data.id}`);
+          setOwner(data);
+          console.log('updated', data)
+        });
       ;
     }
-    else{
-      directusService.items('owner').createOne(ownerToEdit).then(data=>{
+    else {
+      directusService.items('owner').createOne(ownerToEdit).then(data => {
         router.push(`/owner/${data.id}`)//.then(() => router.reload());
-        console.log('created', data)});
-      
+        console.log('created', data)
+      });
+
     }
   }
 
   const savePet = (petToEdit) => {
-    if(petToEdit.id){
-      directusService.items('pet').updateOne(petToEdit.id, petToEdit).then(data=>{
+    if (petToEdit.id) {
+      directusService.items('pet').updateOne(petToEdit.id, petToEdit).then(data => {
         fetchPets();
         console.log('updated pet', data)
       });
       ;
     }
-    else{
+    else {
       directusService.items('pet').createOne({
-        ...petToEdit,ownerId:owner.id 
-      }).then(data=>{
+        ...petToEdit, ownerId: owner.id
+      }).then(data => {
         fetchPets();
-        console.log('created pet', data)});
-      
+        console.log('created pet', data)
+      });
+
     }
   }
 
-  const fetchPets=()=>{
-    if(ownerId){
+  const fetchPets = () => {
+    if (ownerId) {
       directusService.items('pet').readByQuery({
         filter: {
           ownerId: {
             _eq: ownerId,
           },
         },
-        sort:['petName']
-      }).then((data)=>{
+        sort: ['petName']
+      }).then((data) => {
         setPets(data.data);
         console.log('pets', data.data);
       });
     }
   };
-  
-  const addPet=()=>{
-    setPets([ defaultPet, ...pets]);
+
+  const addPet = () => {
+    setPets([defaultPet, ...pets]);
   };
 
-  return{owner, saveOwner, fetchOwner, pets,addPet, fetchPets, savePet};
+  return { owner, saveOwner, fetchOwner, pets, addPet, fetchPets, savePet };
 }
 
 
