@@ -57,13 +57,13 @@ export const PetEdit = ({pet, savePet, ...props}) => {
             <TextField
                 fullWidth
                 label="Pet name"
-                name="petName"
-                error={Boolean(formik.touched.petName && formik.errors.petName)}
-                helperText={formik.touched.petName && formik.errors.petName}
+                name="pet_name"
+                error={Boolean(formik.touched.pet_name && formik.errors.pet_name)}
+                helperText={formik.touched.pet_name && formik.errors.pet_name}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 required
-                value={formik.values.petName}
+                value={formik.values.pet_name}
                 variant="outlined"
                 type='text'
               />

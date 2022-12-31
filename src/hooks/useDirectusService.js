@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
-import { directusService } from '../lib/directusService';
+import { directusService, anonimousDirectusService } from '../lib/directusService';
 
 const useDirectusService = () => {
 
   const isAuthenticated = async () => {
     const token = await directusService.auth.token;
-
-    if (token) {
-      await directusService.auth.refreshIfExpired();
-    }
+  console.log('token on is isAuthenticated', token);
+    
     return !!token;
   }
   const signIn = (authCredentials) => {
@@ -16,7 +14,9 @@ const useDirectusService = () => {
   }
 
   const signOut = async () => {
-    return await directusService.auth.logout();
+    const toRet = await directusService.auth.logout();
+    //directusService.auth.refresh();
+    return toRet;
   }
 
   const getUser = async () => {
@@ -26,7 +26,7 @@ const useDirectusService = () => {
     else return null;
   }
 
-  return { isAuthenticated, directusService, getUser, signOut, signIn };
+  return { isAuthenticated, directusService, anonimousDirectusService, getUser, signOut, signIn };
 }
 
 export default useDirectusService;

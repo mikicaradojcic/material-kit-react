@@ -50,7 +50,7 @@ const Login = () => {
 
         getUser().then(usr => {
           authContext.signIn(usr);
-          Router.push('/').catch(console.error);
+          Router.push('/owner').catch(console.error);
         });
       })
         .catch(error => {

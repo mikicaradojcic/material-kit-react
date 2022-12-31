@@ -6,7 +6,8 @@ import useDirectusService from '../hooks/useDirectusService';
 const HANDLERS = {
   INITIALIZE: 'INITIALIZE',
   SIGN_IN: 'SIGN_IN',
-  SIGN_OUT: 'SIGN_OUT'
+  SIGN_OUT: 'SIGN_OUT',
+  UPDATE_USER:'UPDATE_USER'
 };
 
 const initialState = {
@@ -43,6 +44,15 @@ const handlers = {
       user
     };
   },
+  [HANDLERS.UPDATE_USER]: (state, action) => {
+    const user = action.payload;
+
+    return {
+      ...state,
+      user
+    };
+  },
+  
   [HANDLERS.SIGN_OUT]: (state) => {
     return {
       ...state,
@@ -84,6 +94,9 @@ export const AuthProvider = (props) => {
 
       if (isAuth) {
         // Get user from your database
+        
+        console.log('gettinguser');
+        
         const user = await getUser();
         console.log('user', user);
         dispatch({
@@ -119,13 +132,19 @@ export const AuthProvider = (props) => {
       type: HANDLERS.SIGN_OUT
     });
   };
-
+  const updateUser = (user) => {
+    dispatch({
+      type: HANDLERS.SIGN_IN,
+      payload: user
+    });
+  };
   return (
     <AuthContext.Provider
       value={{
         ...state,
         signIn,
-        signOut
+        signOut,
+        updateUser,
       }}
     >
       {children}

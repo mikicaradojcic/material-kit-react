@@ -48,13 +48,13 @@ export const OwnerEdit = ({addPet,owner,saveOwner, ...props}) => {
               <TextField
                 fullWidth
                 label="First name"
-                name="firstName"
-                error={Boolean(formik.touched.firstName && formik.errors.firstName)}
-                helperText={formik.touched.firstName && formik.errors.firstName}
+                name="first_name"
+                error={Boolean(formik.touched.first_name && formik.errors.first_name)}
+                helperText={formik.touched.first_name && formik.errors.first_name}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 required
-                value={formik.values.firstName}
+                value={formik.values.first_name}
                 variant="outlined"
                 type='text'
               />
@@ -67,13 +67,13 @@ export const OwnerEdit = ({addPet,owner,saveOwner, ...props}) => {
               <TextField
                 fullWidth
                 label="Last name"
-                name="lastName"
-                error={Boolean(formik.touched.lastName && formik.errors.lastName)}
-                helperText={formik.touched.lastName && formik.errors.lastName}
+                name="last_name"
+                error={Boolean(formik.touched.last_name && formik.errors.last_name)}
+                helperText={formik.touched.last_name && formik.errors.last_name}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 required
-                value={formik.values.lastName}
+                value={formik.values.last_name}
                 variant="outlined"
               />
 
@@ -91,13 +91,13 @@ export const OwnerEdit = ({addPet,owner,saveOwner, ...props}) => {
               <TextField
                 fullWidth
                 label="Contact phone"
-                name="contactPhone"
-                error={Boolean(formik.touched.contactPhone && formik.errors.contactPhone)}
-                helperText={formik.touched.contactPhone && formik.errors.contactPhone}
+                name="contact_phone"
+                error={Boolean(formik.touched.contact_phone && formik.errors.contact_phone)}
+                helperText={formik.touched.contact_phone && formik.errors.contact_phone}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 required
-                value={formik.values.contactPhone ||''}
+                value={formik.values.contact_phone ||''}
                 variant="outlined"
               />
               
@@ -136,13 +136,13 @@ export const OwnerEdit = ({addPet,owner,saveOwner, ...props}) => {
               <TextField
                 fullWidth
                 label="Owners note"
-                name="ownersNote"
-                error={Boolean(formik.touched.ownersNote && formik.errors.ownersNote)}
-                helperText={formik.touched.ownersNote && formik.errors.ownersNote}
+                name="owners_note"
+                error={Boolean(formik.touched.owners_note && formik.errors.owners_note)}
+                helperText={formik.touched.owners_note && formik.errors.owners_note}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 required
-                value={formik.values.ownersNote ||''}
+                value={formik.values.owners_note ||''}
                 variant="outlined"
               />
               

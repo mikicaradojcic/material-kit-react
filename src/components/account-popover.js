@@ -7,10 +7,9 @@ import { AuthContext } from '../contexts/auth-context';
 import useDirectusService from '../hooks/useDirectusService';
 export const AccountPopover = (props) => {
 
-  const { signOut } = useDirectusService()
+  const { signOut } = useDirectusService();
   const { anchorEl, onClose, open, ...other } = props;
   const authContext = useContext(AuthContext);
-
   const handleSignOut = async () => {
     onClose?.();
 
@@ -58,7 +57,7 @@ export const AccountPopover = (props) => {
           color="text.secondary"
           variant="body2"
         >
-          John Doe
+          {`${authContext.user.first_name} ${authContext.user.last_name}`}
         </Typography>
       </Box>
       <MenuList

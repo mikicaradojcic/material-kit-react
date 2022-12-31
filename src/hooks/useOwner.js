@@ -1,124 +1,116 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { directusService } from '../lib/directusService';
 import { useRouter } from 'next/router';
 import * as Yup from 'yup';
+import { AuthContext } from '../contexts/auth-context';
 
 
-export const defaultPet = { petName: '' };
-export const defaultOwner = { firstName: '', lastName: '', contactPhone: '', city: '', ownersNote: '' };
+export const defaultPet = { pet_name: '' };
+export const defaultOwner = { first_name: '', last_name: '', contact_phone: '', city: '', owners_note: '' };
 
 export const ownerValidationSchema = Yup.object({
-  firstName: Yup
+  first_name: Yup
     .string()
     .max(255)
     .required('First name is required'),
-  lastName: Yup
+    last_name: Yup
     .string()
     .max(255),
-  contactPhone: Yup
+    contact_phone: Yup
     .string()
-    .max(255),
+    .max(255).nullable(),
   city: Yup
     .string()
-    .max(255),
-  ownersNote: Yup
+    .max(255).nullable(),
+    owners_note: Yup
     .string()
-    .max(4000)
+    .max(4000).nullable()
 });
 
 export const petValidationSchema = Yup.object({
-  petName: Yup
+  pet_name: Yup
     .string()
     .max(255)
     .required('Pet name is required')
 });
 
-const useOwner = (ownerId) => {
-
+const useOwner = () => {
+  
+  const authContext = useContext(AuthContext);
+  const user =authContext.user;
   const [owner, setOwner] = useState(defaultOwner);
   const [pets, setPets] = useState([]);
 
-  const router = useRouter()
+  const router = useRouter();
 
 
-  useEffect(() => {
-    if (ownerId && !owner.id) {
-      console.log(`fetching owner ${ownerId}`, owner);
-      fetchOwner();
-      fetchPets();
+  const  fetchOwner = async (userId) => {
+    const o =await directusService.items('owner').readByQuery({
+      filter: {
+        user_id: {
+          _eq: userId,
+        },
+      }
+    });
+
+    if(!o.data || !o.data[0]){
+      throw('missing owner for user id '+userId);
     }
-  }, [ownerId]);
 
+    console.log('o.data[0]', )
 
-  const fetchOwner = () => {
-    if (ownerId) {
-      directusService.items('owner').readOne(ownerId).then((data) => {
-        setOwner(data ?? defaultOwner);
-      });
-    }
-    else { setOwner(defaultOwner);; }
+    fixAndSetOwner(o.data[0]);
   };
 
-  const saveOwner = (ownerToEdit) => {
-    if (ownerToEdit.id) {
-      directusService.items('owner').updateOne(ownerToEdit.id, ownerToEdit)
-        .then(data => {
-          router.push(`/owner/${data.id}`);
-          setOwner(data);
-          console.log('updated', data)
-        });
-      ;
-    }
-    else {
-      directusService.items('owner').createOne(ownerToEdit).then(data => {
-        router.push(`/owner/${data.id}`)//.then(() => router.reload());
-        console.log('created', data)
-      });
+  const fixAndSetOwner = (owner)=>{
+    setOwner({...owner, first_name:user.first_name, last_name:user.last_name});
 
-    }
   }
+  
 
-  const savePet = (petToEdit) => {
-    if (petToEdit.id) {
-      directusService.items('pet').updateOne(petToEdit.id, petToEdit).then(data => {
-        fetchPets();
-        console.log('updated pet', data)
-      });
-      ;
-    }
-    else {
-      directusService.items('pet').createOne({
-        ...petToEdit, ownerId: owner.id
-      }).then(data => {
-        fetchPets();
-        console.log('created pet', data)
-      });
-
-    }
-  }
-
-  const fetchPets = () => {
-    if (ownerId) {
-      directusService.items('pet').readByQuery({
+  const fetchPets = async (userId) => {
+      const p =await directusService.items('pet').readByQuery({
         filter: {
-          ownerId: {
-            _eq: ownerId,
+          user_id: {
+            _eq: userId,
           },
         },
-        sort: ['petName']
-      }).then((data) => {
-        setPets(data.data);
-        console.log('pets', data.data);
+        sort: ['pet_name']
       });
-    }
-  };
+      setPets(p.data);
+  
+    };
 
   const addPet = () => {
     setPets([defaultPet, ...pets]);
   };
 
+
+  const saveOwner = async (ownerToEdit) => {
+    const u = await directusService.users.updateOne(ownerToEdit.user_id, {first_name:ownerToEdit.first_name,last_name:ownerToEdit.last_name }); 
+    authContext.updateUser(u);
+    const o = await directusService.items('owner').updateOne(ownerToEdit.id, ownerToEdit); 
+    fixAndSetOwner(o);
+  }
+
+  const savePet = async (petToEdit) => {
+    if (petToEdit.id) {
+      await directusService.items('pet').updateOne(petToEdit.id, petToEdit);
+    }
+    else {
+      directusService.items('pet').createOne({
+        ...petToEdit, user_id: user.id
+      })
+      fetchPets(user.id);
+
+    }
+  }
+  useEffect(()=>{
+    fetchOwner(user.id);
+    fetchPets(user.id);
+
+  }, []);
   return { owner, saveOwner, fetchOwner, pets, addPet, fetchPets, savePet };
 }
-
 
 export default useOwner;

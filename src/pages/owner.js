@@ -10,21 +10,13 @@ import {useState, useEffect} from 'react';
 import { OpenWithRounded } from '@mui/icons-material';
 const Page = () => { 
 const router = useRouter();
-const [id,setId] = useState(router.query.id);
 
-const{owner, fetchOwner, saveOwner, pets, addPet,fetchPets, savePet} = useOwner(id);
-
-useEffect(()=>{
-  if(router.query.id){
-    setId(router.query.id);
-  }
-}, [router.query.id]);
-  
+const{owner, saveOwner, pets, addPet, savePet} = useOwner();
 
   return (
-  <div key={id||'newowner'}>
+  <div key={'owner_key'}>
     <Head>
-      {id?'Edit Owner':'New Owner'}
+      'Edit Owner'
     </Head>
     <Box
       component="main"
@@ -38,7 +30,7 @@ useEffect(()=>{
           sx={{ mb: 3 }}
           variant="h4"
         >
-          {id?'Edit Owner':'New Owner'}
+          Edit Owner
         </Typography>
         <Grid
           container

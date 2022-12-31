@@ -1,9 +1,11 @@
+import { useContext } from 'react';
 import Head from 'next/head';
 import NextLink from 'next/link';
 import Router from 'next/router';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import useDirectusService from '../hooks/useDirectusService';
+import { AuthContext } from '../contexts/auth-context';
 
 import {
   Box,
@@ -18,8 +20,9 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const Register = () => {
+  const authContext = useContext(AuthContext);
 
-  const { directusService, signIn } = useDirectusService();
+  const { anonimousDirectusService, signIn } = useDirectusService();
 
   const formik = useFormik({
     initialValues: {
@@ -55,27 +58,31 @@ const Register = () => {
           'This field must be checked'
         )
     }),
-    onSubmit: (userData) => {
-      directusService.users.createOne({
+    onSubmit: async (userData) => {
+
+      const userToCreate = {
         email: userData.email,
         password: userData.password,
         first_name: userData.firstName,
         last_name: userData.lastName,
-        role: process.env.DIRECTUS_USER_ROLE_GUID
-      }).then(createdUser => {
+        role: process.env.NEXT_PUBLIC_DIRECTUS_USER_ROLE_GUID
+      };
 
-        signIn({
-          email: userData.email,
-          password: userData.password,
-        }).then(() => {
-          authContext.signIn(createdUser);
-          Router.push('/owner').catch(console.error);
-        });
-      });
+      console.log('userToCreate', userToCreate);
 
-      Router
-        .push('/login')
-        .catch(console.error);
+      const u = await anonimousDirectusService.users.createOne(userToCreate);
+
+      console.log('u', u);
+      const o = await anonimousDirectusService.items("owner").createOne({user_id:u.id});
+      console.log('o', o);
+      
+      await signIn({
+        email: userData.email,
+        password: userData.password,
+      })
+      
+        authContext.signIn(u);
+        Router.push('/owner').catch(console.error);
     }
   });
 
